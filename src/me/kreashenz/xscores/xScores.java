@@ -16,7 +16,6 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.plugin.Plugin;
-import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scoreboard.DisplaySlot;
@@ -47,12 +46,16 @@ public class xScores extends JavaPlugin implements Listener {
 		cmdExe = new xScoresCommand(this);
 
 		setupTimer();
-		setupVault(getServer().getPluginManager());
+		setupVault();
+
 		getServer().getPluginManager().registerEvents(this,this);
+
 		getCommand("clearscores").setExecutor(cmdExe);
 		getCommand("kdr").setExecutor(cmdExe);
+		getCommand("xboard").setExecutor(cmdExe);
 
 		saveDefaultConfig();
+		saveResource("stats.yml", false);
 
 		try {
 			new Metrics(this).start();
@@ -61,7 +64,7 @@ public class xScores extends JavaPlugin implements Listener {
 		}
 
 		runSaveTimer();
-		
+
 		if(!a.contains("Streak-Tag")){
 			a.set("Streak-Tag", "&aStreak&7: &c");
 			saveConfig();
@@ -72,16 +75,19 @@ public class xScores extends JavaPlugin implements Listener {
 	@EventHandler
 	public void PlayerJoinEvent(PlayerJoinEvent e){
 		Player p = e.getPlayer();
-		setScoreboard(p);
-		if(!a.contains(p.getName())){
-			a.set(p.getName() + ".kills", "0");
-			a.set(p.getName() + ".deaths", "0");
+		if(!conf.contains(p.getName())){
+			conf.set(p.getName() + ".kills", "0");
+			conf.set(p.getName() + ".deaths", "0");
 			try {
 				conf.save(file);
 			} catch(IOException ex){
 				ex.printStackTrace();
 			}
 		}
+
+		kills.put(p.getName(), conf.getInt(p.getName() + ".kills"));
+		deaths.put(p.getName(), conf.getInt(p.getName() + ".deaths"));
+		setScoreboard(p);
 	}
 
 	@EventHandler
@@ -196,8 +202,8 @@ public class xScores extends JavaPlugin implements Listener {
 		}
 	}
 
-	private void setupVault(PluginManager pm) {
-		Plugin vault =  pm.getPlugin("Vault");
+	private void setupVault() {
+		Plugin vault = getServer().getPluginManager().getPlugin("Vault");
 		if (vault != null && vault instanceof net.milkbowl.vault.Vault) {
 			getLogger().info("Loaded Vault v" + vault.getDescription().getVersion());
 			if (!setupEconomy()) {
