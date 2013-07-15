@@ -1,0 +1,8 @@
+# xScores Config/Data File.
+Stats-Tag: '&bYour stats&7:&c'
+Kills-Tag: '&aKills&7:&c'
+Deaths-Tag: '&aDeaths&7:&c'
+Balance-Tag: '&aBalance&7:&c'
+
+Scoreboard-Update-Time: 5
+Stats-File-Save-Time: 20
