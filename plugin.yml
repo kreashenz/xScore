@@ -1,13 +1,15 @@
 main: me.kreashenz.xscores.xScores
 name: xScores
 description: xScores
-version: 1.3
+version: 1.4
 authors: [kreashenz, stuntguy3000]
 softdepend: [Vault]
 commands:
-    clearscores:
-        description: Reset the scoreboards.
-    kdr:
-        description: Display your kdr.
-    xboard:
-        description: Enable/disable the xScore scoreboard.
+  clearscores:
+    description: Reset the scoreboards.
+  kdr:
+    description: Display your kdr.
+  xboard:
+    description: Enable/disable the xScore scoreboard.
+  xscore:
+    description: Reload/save xScore config.
