@@ -24,7 +24,7 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.scheduler.BukkitTask;
-	
+
 public class Metrics {
 
 	private final static int REVISION = 6;
@@ -137,7 +137,8 @@ public class Metrics {
 						postPlugin(!firstPost);
 
 						firstPost = false;
-					} catch (IOException e) {
+					}
+					catch (IOException e) {
 						if (debug) {
 							Bukkit.getLogger().log(Level.INFO, "[Metrics] " + e.getMessage());
 						}
@@ -153,12 +154,14 @@ public class Metrics {
 		synchronized (optOutLock) {
 			try {
 				configuration.load(getConfigFile());
-			} catch (IOException ex) {
+			}
+			catch (IOException ex) {
 				if (debug) {
 					Bukkit.getLogger().log(Level.INFO, "[Metrics] " + ex.getMessage());
 				}
 				return true;
-			} catch (InvalidConfigurationException ex) {
+			}
+			catch (InvalidConfigurationException ex) {
 				if (debug) {
 					Bukkit.getLogger().log(Level.INFO, "[Metrics] " + ex.getMessage());
 				}
@@ -209,7 +212,6 @@ public class Metrics {
 		String pluginVersion = description.getVersion();
 		String serverVersion = Bukkit.getVersion();
 		int playersOnline = Bukkit.getServer().getOnlinePlayers().length;
-
 
 		final StringBuilder data = new StringBuilder();
 
@@ -263,7 +265,8 @@ public class Metrics {
 
 		if (isMineshafterPresent()) {
 			connection = url.openConnection(Proxy.NO_PROXY);
-		} else {
+		}
+		else {
 			connection = url.openConnection();
 		}
 
@@ -281,7 +284,8 @@ public class Metrics {
 
 		if (response == null || response.startsWith("ERR")) {
 			throw new IOException(response);
-		} else {
+		}
+		else {
 			if (response.contains("OK This is your first update this hour")) {
 				synchronized (graphs) {
 					final Iterator<Graph> iter = graphs.iterator();
@@ -302,7 +306,8 @@ public class Metrics {
 		try {
 			Class.forName("mineshafter.MineServer");
 			return true;
-		} catch (Exception e) {
+		}
+		catch (Exception e) {
 			return false;
 		}
 	}
