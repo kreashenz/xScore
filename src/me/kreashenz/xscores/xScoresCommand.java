@@ -38,9 +38,7 @@ public class xScoresCommand implements CommandExecutor {
 						plugin.setScoreboard(target);
 					}
 					p.sendMessage("§cScores cleared.");
-				}
-				else
-					p.sendMessage("§cYou do not have permission to do this.");
+				} else p.sendMessage("§cYou do not have permission to do this.");
 			}
 			if (cmd.getName().equalsIgnoreCase("kdr")) {
 				if (p.hasPermission("xscores.kdr")) {
@@ -52,12 +50,9 @@ public class xScoresCommand implements CommandExecutor {
 						if (t != null) {
 							p.sendMessage("§9" + t.getName() + "§a's KDR is §9" + plugin.getKDR(t));
 						}
-						else
-							p.sendMessage("§cThat player is not found.");
+						else p.sendMessage("§cThat player is not found.");
 					}
-				}
-				else
-					p.sendMessage("§cYou do not have permission to use this command.");
+				} else p.sendMessage("§cYou do not have permission to use this command.");
 			}
 			if (cmd.getName().equalsIgnoreCase("xboard")) {
 				if (p.hasPermission("xscores.xboard")) {
@@ -71,16 +66,9 @@ public class xScoresCommand implements CommandExecutor {
 							plugin.setScoreboard(p);
 							p.sendMessage("§aSuccessfully §cenabled §athe xScores scoreboard. Use §c/xboard §aagain to remove it.");
 							enabled.put(p.getName(), true);
-						}
-						else {
-							p.sendMessage("§cSomething is wrong. Uh oh.");
-						}
-					}
-					else
-						p.sendMessage("§cxScore boards are not active.");
-				}
-				else
-					p.sendMessage("§cYou do not have permission to use this command.");
+						} else p.sendMessage("§cSomething is wrong. Uh oh.");
+					} else p.sendMessage("§cxScore boards are not active.");
+				} else p.sendMessage("§cYou do not have permission to use this command.");
 			}
 			if (cmd.getName().equalsIgnoreCase("xscore")) {
 				if (p.hasPermission("xscores.admin")) {
@@ -99,14 +87,9 @@ public class xScoresCommand implements CommandExecutor {
 							plugin.saveConfig();
 							plugin.saveFile();
 							p.sendMessage("§aSuccessfully saved configs.");
-						}
-						else {
-							p.sendMessage("§cInvalid arguments. /xscore <reload | save>");
-						}
+						} else p.sendMessage("§cInvalid arguments. /xscore <reload | save>");
 					}
-				}
-				else
-					p.sendMessage("§cYou do not have permission to use this command.");
+				} else p.sendMessage("§cYou do not have permission to use this command.");
 			}
 		}
 		return true;

@@ -8,23 +8,21 @@ import net.milkbowl.vault.economy.Economy;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
-import org.bukkit.event.entity.PlayerDeathEvent;
-import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scoreboard.DisplaySlot;
 import org.bukkit.scoreboard.Objective;
 import org.bukkit.scoreboard.Scoreboard;
 
-public class xScores extends JavaPlugin implements Listener {
+public class xScores extends JavaPlugin {
 
-	private HashMap<String, Integer> streak = new HashMap<String, Integer>();
+	public HashMap<String, Integer> streak = new HashMap<String, Integer>();
 
 	public Economy economy = null;
 	public FileConfiguration a;
@@ -32,7 +30,7 @@ public class xScores extends JavaPlugin implements Listener {
 	protected File file;
 	private FileConfiguration conf;
 
-	private xScoresCommand cmdExe;
+	protected xScoresCommand cmdExe;
 
 	public void onEnable() {
 		saveDefaultConfig();
@@ -46,7 +44,7 @@ public class xScores extends JavaPlugin implements Listener {
 
 		setupVault();
 
-		getServer().getPluginManager().registerEvents(this, this);
+		getServer().getPluginManager().registerEvents(new Events(this), this);
 
 		getCommand("clearscores").setExecutor(cmdExe);
 		getCommand("kdr").setExecutor(cmdExe);
@@ -60,74 +58,67 @@ public class xScores extends JavaPlugin implements Listener {
 			e.printStackTrace();
 		}
 
-		runSaveTimer();
-	}
-
-	@EventHandler
-	public void PlayerJoinEvent(PlayerJoinEvent e) {
-		Player p = e.getPlayer();
-		if (conf.get(p.getName() + ".kills") == null) {
-			conf.set(p.getName() + ".kills", 0);
-			conf.set(p.getName() + ".deaths", 0);
-			try {
-				conf.save(file);
-			}
-			catch (IOException ex) {
-				ex.printStackTrace();
-			}
-		}
-
-		streak.put(p.getName(), 0);
-		cmdExe.enabled.put(p.getName(), true);
-
-		setScoreboard(p);
-	}
-
-	@EventHandler
-	public void PlayerDeathEvent(PlayerDeathEvent e) {
-		Player p = e.getEntity().getPlayer();
-		if (p.getKiller() != null && p.getKiller() instanceof Player) {
-			Player k = p.getKiller();
-			setKills(k, getKills(k) + 1);
-			setStreaks(k);
-			setDeaths(p, getDeaths(p) + 1);
-			clearStreaks(p);
-			setScoreboard(k);
-		}
-		else {
-			setDeaths(p, getDeaths(p) + 1);
-			clearStreaks(p);
-		}
-		setScoreboard(p);
+		runTimer();
 	}
 
 	public void setScoreboard(Player p) {
 		Scoreboard board = Bukkit.getScoreboardManager().getNewScoreboard();
-
 		Objective objective = board.registerNewObjective("xScores", "dummy");
 		objective.setDisplaySlot(DisplaySlot.SIDEBAR);
-		String b = format(a.getString("Stats-Tag"));
-		b = b.replace("{NAME}", p.getName());
-		objective.setDisplayName(b);
-
-		objective.getScore(Bukkit.getOfflinePlayer(format(a.getString("Kills-Tag")))).setScore(getKills(p));
-
-		objective.getScore(Bukkit.getOfflinePlayer(format(a.getString("Deaths-Tag")))).setScore(getDeaths(p));
-
-		objective.getScore(Bukkit.getOfflinePlayer(format(a.getString("Streak-Tag")))).setScore(getStreaks(p));
+		objective.setDisplayName(format(a.getString("Stats-Tag")).replace("{NAME}", p.getName()));
+		objective.getScore(g(a.getString("Kills-Tag"))).setScore(getKills(p));
+		objective.getScore(g(a.getString("Deaths-Tag"))).setScore(getDeaths(p));
+		objective.getScore(g(a.getString("Streak-Tag"))).setScore(getStreaks(p));
+		objective.getScore(g(a.getString("Balance-Tag"))).setScore((Integer)get(p.getName() + ".cavespider"));
+		objective.getScore(g(a.getString("CaveSpider-Tag"))).setScore((Integer)get(p.getName() + ".creeper"));
+		objective.getScore(g(a.getString("Creeper-Tag"))).setScore((Integer)get(p.getName() + ".enderman"));
+		objective.getScore(g(a.getString("Enderman-Tag"))).setScore((Integer)get(p.getName() + ".pigzombie"));
+		objective.getScore(g(a.getString("Skeleton-Tag"))).setScore((Integer)get(p.getName() + ".skeleton"));
+		objective.getScore(g(a.getString("Spider-Tag"))).setScore((Integer)get(p.getName() + ".spider"));
+		objective.getScore(g(a.getString("Zombie-Tag"))).setScore((Integer)get(p.getName() + ".zombie"));
+		objective.getScore(g(a.getString("Other-Tag"))).setScore((Integer)get(p.getName() + ".other"));
 
 		if (economy != null) {
-			objective.getScore(Bukkit.getOfflinePlayer(format(a.getString("Balance-Tag")))).setScore((int) economy.getBalance(p.getName()));
+			objective.getScore(g(a.getString("Balance-Tag"))).setScore((int) economy.getBalance(p.getName()));
 		}
 		p.setScoreboard(board);
 	}
 
+	private void updateScoreboard(Player p){
+		if(Bukkit.getScoreboardManager().getMainScoreboard() != null){
+			Scoreboard b = Bukkit.getScoreboardManager().getMainScoreboard();
+			if(b.getObjective(DisplaySlot.SIDEBAR) == null){
+				setScoreboard(p);
+				return;
+			}
+			Objective ob = b.getObjective(DisplaySlot.SIDEBAR);
+			ob.getScore(g(a.getString("Kills-Tag"))).setScore(getKills(p));
+			ob.getScore(g(a.getString("Deaths-Tag"))).setScore(getDeaths(p));
+			ob.getScore(g(a.getString("Streak-Tag"))).setScore(getStreaks(p));
+			ob.getScore(g(a.getString("Balance-Tag"))).setScore((Integer)get(p.getName() + ".cavespider"));
+			ob.getScore(g(a.getString("CaveSpider-Tag"))).setScore((Integer)get(p.getName() + ".creeper"));
+			ob.getScore(g(a.getString("Creeper-Tag"))).setScore((Integer)get(p.getName() + ".enderman"));
+			ob.getScore(g(a.getString("Enderman-Tag"))).setScore((Integer)get(p.getName() + ".pigzombie"));
+			ob.getScore(g(a.getString("Skeleton-Tag"))).setScore((Integer)get(p.getName() + ".skeleton"));
+			ob.getScore(g(a.getString("Spider-Tag"))).setScore((Integer)get(p.getName() + ".spider"));
+			ob.getScore(g(a.getString("Zombie-Tag"))).setScore((Integer)get(p.getName() + ".zombie"));
+			ob.getScore(g(a.getString("Other-Tag"))).setScore((Integer)get(p.getName() + ".other"));
+			if (economy != null) {
+				ob.getScore(g("Balance-Tag")).setScore((int) economy.getBalance(p.getName()));
+			}
+		}
+	}
+
+	private OfflinePlayer g(String name){
+		return Bukkit.getOfflinePlayer(format(name));
+	}
+
 	public int getKills(Player p) {
-		return (conf.get(p.getName() + ".kills") != null ? conf.getInt(p.getName() + ".kills") : 0);
+		return (get(p.getName() + ".kills") != null ? conf.getInt(p.getName() + ".kills") : 0);
 	}
 
 	public int getDeaths(Player p) {
-		return (conf.get(p.getName() + ".deaths") != null ? conf.getInt(p.getName() + ".deaths") : 0);
+		return (get(p.getName() + ".deaths") != null ? conf.getInt(p.getName() + ".deaths") : 0);
 	}
 
 	public int getStreaks(Player p) {
@@ -157,13 +148,11 @@ public class xScores extends JavaPlugin implements Listener {
 	}
 
 	public void setKills(Player p, int kills) {
-		conf.set(p.getName() + ".kills", kills);
-		saveFile();
+		set(p.getName() + ".kills", kills);
 	}
 
 	public void setDeaths(Player p, int deaths) {
-		conf.set(p.getName() + ".deaths", deaths);
-		saveFile();
+		set(p.getName() + ".deaths", deaths);
 	}
 
 	public void setStreaks(Player p) {
@@ -203,26 +192,38 @@ public class xScores extends JavaPlugin implements Listener {
 		}
 	}
 
-	private void runSaveTimer() {
-		getServer().getScheduler().scheduleSyncRepeatingTask(this, new Runnable() {
-			public void run() {
-				for (Player p : Bukkit.getOnlinePlayers()) {
-					conf.set(p.getName() + ".kills", getKills(p));
-					conf.set(p.getName() + ".deaths", getDeaths(p));
-					saveFile();
-				}
-			}
-		}, 0L, getConfig().getInt("Stats-File-Save-Time")*20);
-	}
-
 	public int something(int a, int b) {
-		if (b == 0)
-			return a;
+		if (b == 0) return a;
 		return something(b, a % b);
 	}
-	
+
 	public String format(String input){
 		return ChatColor.translateAlternateColorCodes('&', input);
+	}
+
+	public Object get(String path){
+		if(conf.get(path) instanceof Integer){
+			return conf.getInt(path);
+		}
+		if(conf.get(path) instanceof String){
+			return conf.getString(path);
+		}
+		return conf.get(path);
+	}
+
+	public void set(String path, Object value){
+		conf.set(path, value);
+		saveFile();
+	}
+
+	private void runTimer(){
+		getServer().getScheduler().scheduleSyncRepeatingTask(this, new BukkitRunnable(){
+			public void run(){
+				for(Player p : Bukkit.getOnlinePlayers()){
+					updateScoreboard(p);
+				}
+			}
+		}, 0l, 20l);
 	}
 
 }
