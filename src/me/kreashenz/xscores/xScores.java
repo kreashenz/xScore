@@ -70,7 +70,6 @@ public class xScores extends JavaPlugin {
 		objective.getScore(g(getConfig().getString("Enderman-Tag"))).setScore((Integer) get(p.getName() + ".enderman"));
 		objective.getScore(g(getConfig().getString("CaveSpider-Tag"))).setScore((Integer) get(p.getName() + ".cavespider"));
 		objective.getScore(g(getConfig().getString("Creeper-Tag"))).setScore((Integer) get(p.getName() + ".creeper"));
-		objective.getScore(g(getConfig().getString("Pigzombie-Tag"))).setScore((Integer) get(p.getName() + ".pigzombie"));
 		objective.getScore(g(getConfig().getString("Skeleton-Tag"))).setScore((Integer) get(p.getName() + ".skeleton"));
 		objective.getScore(g(getConfig().getString("Spider-Tag"))).setScore((Integer) get(p.getName() + ".spider"));
 		objective.getScore(g(getConfig().getString("Zombie-Tag"))).setScore((Integer) get(p.getName() + ".zombie"));
@@ -92,7 +91,6 @@ public class xScores extends JavaPlugin {
 			ob.getScore(g(getConfig().getString("Enderman-Tag"))).setScore((Integer) get(p.getName() + ".enderman"));
 			ob.getScore(g(getConfig().getString("CaveSpider-Tag"))).setScore((Integer) get(p.getName() + ".cavespider"));
 			ob.getScore(g(getConfig().getString("Creeper-Tag"))).setScore((Integer) get(p.getName() + ".creeper"));
-			ob.getScore(g(getConfig().getString("Pigzombie-Tag"))).setScore((Integer) get(p.getName() + ".pigzombie"));
 			ob.getScore(g(getConfig().getString("Skeleton-Tag"))).setScore((Integer) get(p.getName() + ".skeleton"));
 			ob.getScore(g(getConfig().getString("Spider-Tag"))).setScore((Integer) get(p.getName() + ".spider"));
 			ob.getScore(g(getConfig().getString("Zombie-Tag"))).setScore((Integer) get(p.getName() + ".zombie"));
@@ -126,21 +124,7 @@ public class xScores extends JavaPlugin {
 	}
 
 	public double getKDR(Player p) {
-		int kills = getKills(p);
-		int deaths = getDeaths(p);
-		int kdr = something(kills, deaths);
-		if (kdr != 0) {
-			kills = kills / kdr;
-			deaths = deaths / kdr;
-		}
-		double ratio = Math.round(((double) kills / (double) deaths) * 100D) / 100D;
-		if (kills == 0) {
-			ratio = 0.0;
-		}
-		else if (deaths == 0) {
-			ratio = kills;
-		}
-		return ratio;
+		return (double) getKills(p) / (double) (getDeaths(p) == 0 ? 1 : getDeaths(p));
 	}
 
 	public void setKills(Player p, int kills) {

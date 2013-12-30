@@ -1,7 +1,7 @@
 main: me.kreashenz.xscores.xScores
 name: xScores
 description: xScores
-version: 1.5
+version: 1.6
 authors: [kreashenz, stuntguy3000]
 softdepend: [Vault]
 commands:

@@ -35,10 +35,6 @@ public class Events implements Listener {
 				String en = n + ".enderman";
 				plugin.set(en, (Integer) plugin.get(en) + 1);
 			break;
-			case PIG_ZOMBIE:
-				String s = n + ".pigzombie";
-				plugin.set(s, (Integer) plugin.get(s) + 1);
-			break;
 			case SKELETON:
 				String sk = n + ".skeleton";
 				plugin.set(sk, (Integer) plugin.get(sk) + 1);
